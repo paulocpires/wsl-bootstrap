@@ -1,0 +1,54 @@
+- name: Configuração do Ubuntu no WSL 2
+  hosts: localhost
+  connection: local
+  become: true
+
+  tasks:
+    - name: Atualiza pacotes
+      apt:
+        update_cache: yes
+        upgrade: full
+
+    - name: Instala pacotes essenciais
+      apt:
+        name:
+          - build-essential
+          - curl
+          - wget
+          - git
+          - unzip
+          - zip
+          - tmux
+          - htop
+          - neovim
+          - zsh
+          - fzf
+          - ripgrep
+          - bat
+          - python3-pip
+          - nodejs
+          - npm
+          - ca-certificates
+          - jq
+        state: latest
+
+    - name: Define Zsh como shell padrão
+      user:
+        name: "{{ ansible_user_id }}"
+        shell: /usr/bin/zsh
+
+    - name: Instala Oh My Zsh
+      shell: >
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      args:
+        creates: ~/.oh-my-zsh
+
+    - name: Configura aliases no .zshrc
+      lineinfile:
+        path: ~/.zshrc
+        line: "{{ item }}"
+        create: yes
+      loop:
+        - 'alias cat="bat --style=plain"'
+        - 'alias grep="rg"'
+        - 'alias vim="nvim"'
